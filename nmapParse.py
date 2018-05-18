@@ -19,6 +19,18 @@ def printsortedlist(list):
         print output[:-1]
 
 
+def printSSHLocalPortForward(list):
+        output = ""
+        list = sorted(set(list))
+        # list = list.sort(key=int)
+        # list = sorted(list, key=lambda x: x[-1])
+        lport = 81
+        for l in list:
+                output += "-L \*:" + str(lport) + ":" + str(l) + " "
+                lport += 1
+        print "Count: " + str(len(list))
+        print output[:-1]
+
 def printsortedlistall(list):
         output = ""
         list = sorted(list)
@@ -72,13 +84,14 @@ openhosts = []
 #PORT	PROTOCOL	SERVICE	VERSION
 #443	tcp	ssl/http
 openportprotoserviceversion = []
+hostPort = []
 servicePort = []
 servicePortNoBanner = []
 servicePortCount = []
 
 for h in nmap_report.hosts:
         for s in h.services:
-                if s.state != "open|filtered":
+                if s.state != "open|filtered" and s.state != "filtered":
                         openports.append(s.port)
                         openhosts.append(h.ipv4)
                         if s.protocol == "tcp":
@@ -87,6 +100,7 @@ for h in nmap_report.hosts:
                                 openudp.append(s.port)
 
                         openportprotoserviceversion.append(str(h.ipv4) + "," + str(s.port) + "," + str(s.protocol) + "," + str(s.state) + "," + str(s.service) + "," + str(s.banner) + "," +  str(s.servicefp))
+                        hostPort.append(str(h.ipv4) + ":" + str(s.port))
                         servicePort.append(str(s.port) + " - " + str(s.protocol).upper() + " - " + str(s.service) + "," +  str(s.banner))
                         servicePortNoBanner.append(str(s.port) + " - " + str(s.protocol).upper() + " - " + str(s.service))
                         #for uniqueService in servicePort:
@@ -98,11 +112,11 @@ print "--All Open Ports--"
 printsortedlist(openports)
 
 
-print "--TCP--" #+ str(len(opentcp))
+print "--Open TCP Ports--" #+ str(len(opentcp))
 printsortedlist(opentcp)
 
 
-print "--UDP--" #+ str(len(openudp))
+print "--Open UDP Ports--" #+ str(len(openudp))
 printsortedlist(openudp)
 
 print "--Hosts with open ports-- " #+ str(len(openhosts))
@@ -132,3 +146,6 @@ printsortedlistnewlines(servicePort)
 #print "--Services,PortCount-Count--"
 #print "Services,Count"
 #printsortedlistnewlinesallcount(servicePort)
+
+print "--SSH Port Forward Format--"
+printSSHLocalPortForward(hostPort)
